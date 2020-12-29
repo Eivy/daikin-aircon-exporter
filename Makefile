@@ -1,10 +1,10 @@
 .PHONY: build/daikin-aircon-exporter
 build/daikin-aircon-exporter:
 	mkdir -p build
-	go build -o $@ -ldflags "-X github.com/eivy/daikin-aircon-exporter.version=$(VERSION)" 
+	go build -o $@ -ldflags "-X github.com/eivy/daikin-aircon-exporter.Version=$(VERSION)" 
 .PHONY: image
 image:
-	docker buildx build --load --platform linux/arm64,linux/amd64 -t $(IMAGE_PREFIX)daikin-aircon-exporter:devel --build-arg VERSION=$(VERSION) .
+	docker buildx build --load --platform linux/arm64 -t $(IMAGE_PREFIX)daikin-aircon-exporter:devel --build-arg VERSION=$(VERSION) .
 .PHONY: tag
 tag:
 	docker tag $(IMAGE_PREFIX)topolvm:devel $(IMAGE_PREFIX)topolvm:$(IMAGE_TAG)
