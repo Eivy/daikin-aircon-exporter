@@ -1,10 +1,10 @@
 FROM golang:latest as build
 ENV GO111MODULE=on
 
-COPY . /go/src/github.com/eivy/daikin-aircon-exporter
-WORKDIR /go/src/github.com/eivy/daikin-aircon-exporter
-RUN go build
+COPY . /workdir
+WORKDIR /workdir
+RUN make
 
 FROM scratch
-COPY --from=build /daikin-aircon-exporter/daikin-aircon-exporter .
+COPY --from=build /workdir/build/daikin-aircon-exporter .
 ENTRYPOINT ["daikin-aircon-exporter"]
