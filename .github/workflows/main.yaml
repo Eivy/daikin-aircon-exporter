@@ -15,7 +15,6 @@ jobs:
           go-version: 1.13
       - run: make tools
       - run: make test
-      - run: sudo -E env PATH=${PATH} go test -mod=vendor -race -v .
       - uses: crazy-max/ghaction-docker-buildx@v3
         with:
           buildx-version: latest
