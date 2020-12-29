@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/eivy/daikin-aircon-exporter/exporter"
+	"github.com/Eivy/daikin-aircon-exporter/exporter"
 )
 
 func main() {
