@@ -1,0 +1,22 @@
+name: Main
+on:
+  pull_request:
+  push:
+    branches:
+      - 'master'
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.13
+      - run: make test
+      - run: sudo -E env PATH=${PATH} go test -mod=vendor -race -v .
+      - uses: crazy-max/ghaction-docker-buildx@v3
+        with:
+          buildx-version: latest
+          qemu-version: latest
+      - run: make image
