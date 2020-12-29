@@ -18,3 +18,9 @@ test:
 	go test -race -v ./...
 	go vet ./...
 	test -z "$$(go vet ./... | grep -v '^vendor' | tee /dev/stderr)"
+.PHONY: tools
+tools:
+	cd /tmp; env GOFLAGS= GO111MODULE=on go get golang.org/x/tools/cmd/goimports
+	cd /tmp; env GOFLAGS= GO111MODULE=on go get honnef.co/go/tools/cmd/staticcheck
+	cd /tmp; env GOFLAGS= GO111MODULE=on go get github.com/gordonklaus/ineffassign
+	cd /tmp; env GOFLAGS= GO111MODULE=on go get github.com/gostaticanalysis/nilerr/cmd/nilerr
