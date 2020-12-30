@@ -4,7 +4,7 @@ IMAGE_ARCH=
 .PHONY: build/daikin-aircon-exporter
 build/daikin-aircon-exporter:
 	mkdir -p build
-	go build -o $@ -ldflags "-X github.com/eivy/daikin-aircon-exporter.Version=$(VERSION)" 
+	go build -o $@ -ldflags "-X github.com/eivy/daikin-aircon-exporter/exporter.Version=$(VERSION)" 
 .PHONY: image
 image:
 ifdef IMAGE_ARCH

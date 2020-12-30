@@ -17,7 +17,7 @@ func main() {
 	flag.BoolVar(&version, "version", false, "print version")
 	flag.Parse()
 	if version {
-		fmt.Println(Version)
+		fmt.Println(exporter.Version)
 		os.Exit(0)
 	}
 	if target == "" {
