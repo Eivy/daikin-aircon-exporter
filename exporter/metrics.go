@@ -490,8 +490,8 @@ func (m Metrics) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
-func (m Metrics) getInfo(path string, ch chan<- prometheus.Metric) (err error) {
-	r, err := http.DefaultClient.Get(m.Target + path)
+func (m Metrics) getInfo(relativePath string, ch chan<- prometheus.Metric) (err error) {
+	r, err := http.DefaultClient.Get("http://" + path.Join(m.Target, relativePath))
 	if err != nil {
 		return
 	}
