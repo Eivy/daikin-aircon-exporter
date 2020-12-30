@@ -9,14 +9,25 @@ jobs:
     name: build
     runs-on: ubuntu-18.04
     steps:
+      - name: Export IMAGE_PREFIX
+        run: |
+          if [ "${{ secrets.IMAGE_PREFIX }}" != "" ]; then IMAGE_PREFIX=${{ secrets.IMAGE_PREFIX }}; else IMAGE_PREFIX=ghcr.io/eivy/; fi
+          echo "IMAGE_PREFIX=${IMAGE_PREFIX}" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.13
+          go-version: 1.15
       - run: make tools
       - run: make test
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PASSWORD }}
       - uses: crazy-max/ghaction-docker-buildx@v3
         with:
           buildx-version: latest
           qemu-version: latest
-      - run: make image
+      - run: make image tag push
+      - run: make image tag push IMAGE_ARCH=arm64

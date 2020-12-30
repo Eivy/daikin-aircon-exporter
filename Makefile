@@ -1,13 +1,32 @@
+VERSION ?= devel
+IMAGE_TAG ?= devel
+IMAGE_ARCH=
 .PHONY: build/daikin-aircon-exporter
 build/daikin-aircon-exporter:
 	mkdir -p build
 	go build -o $@ -ldflags "-X github.com/eivy/daikin-aircon-exporter.Version=$(VERSION)" 
 .PHONY: image
 image:
-	docker buildx build --load --platform linux/arm64 -t $(IMAGE_PREFIX)daikin-aircon-exporter:devel --build-arg VERSION=$(VERSION) .
+ifdef IMAGE_ARCH
+	docker buildx build --load --platform linux/$(IMAGE_ARCH) -t $(IMAGE_PREFIX)daikin-aircon-exporter:devel-$(IMAGE_ARCH) --build-arg VERSION=$(VERSION) .
+else
+	docker build -t $(IMAGE_PREFIX)daikin-aircon-exporter:devel --build-arg VERSION=$(VERSION) .
+endif
+.PHONY: push
+push:
+ifdef IMAGE_ARCH
+	docker push $(IMAGE_PREFIX)daikin-aircon-exporter:$(IMAGE_TAG)-$(IMAGE_ARCH)
+else
+	docker push $(IMAGE_PREFIX)daikin-aircon-exporter:$(IMAGE_TAG)
+endif
+
 .PHONY: tag
 tag:
-	docker tag $(IMAGE_PREFIX)topolvm:devel $(IMAGE_PREFIX)topolvm:$(IMAGE_TAG)
+ifdef IMAGE_ARCH
+	docker tag $(IMAGE_PREFIX)daikin-aircon-exporter:devel $(IMAGE_PREFIX)daikin-aircon-exporter:$(IMAGE_TAG)-$(IMAGE_ARCH)
+else
+	docker tag $(IMAGE_PREFIX)daikin-aircon-exporter:devel $(IMAGE_PREFIX)daikin-aircon-exporter:$(IMAGE_TAG)
+endif
 .PHONY: test
 test:
 	test -z "$$(gofmt -s -l . | grep -v '^vendor' | tee /dev/stderr)"

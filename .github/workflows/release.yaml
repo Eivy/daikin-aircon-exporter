@@ -6,7 +6,7 @@ on:
 jobs:
   release:
     name: release
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Validate Release Version
         id: check_version
@@ -19,7 +19,12 @@ jobs:
           if [ $(echo $VERSION | grep "-") ]; then PRERELEASE=true; else PRERELEASE=false; fi
           echo "::set-output name=version::${VERSION}"
           echo "::set-output name=prerelease::${PRERELEASE}"
-      - run: echo ${{ secrets.GHCR_PASSWORD }} | docker login -u ${{ secrets.GHCR_USER }} --password-stdin ghcr.io
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PASSWORD }}
       - name: Export IMAGE_PREFIX
         run: |
           if [ "${{ secrets.IMAGE_PREFIX }}" != "" ]; then IMAGE_PREFIX=${{ secrets.IMAGE_PREFIX }}; else IMAGE_PREFIX=ghcr.io/eivy/; fi
@@ -28,36 +33,35 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: 1.15
-      - run: make build VERSION=${{ steps.check_version.outputs.version }}
-      - run: tar czf daikin-aircon-exporter${{ steps.check_version.outputs.version }}.tar.gz -C ./build
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v3
+        with:
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: ${{ steps.check_version.outputs.version }}
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
       - uses: crazy-max/ghaction-docker-buildx@v3
         with:
           buildx-version: latest
           qemu-version: latest
       - run: make image VERSION=${{ steps.check_version.outputs.version }}
       - run: make tag push IMAGE_TAG=${{ steps.check_version.outputs.version }}
+      - run: make image VERSION=${{ steps.check_version.outputs.version }} IMAGE_ARCH=arm64
+      - run: make tag push IMAGE_TAG=${{ steps.check_version.outputs.version }} IMAGE_ARCH=arm64
       - name: Push branch tag
         if: ${{ steps.check_version.outputs.prerelease == 'false' }}
         run: |
           BRANCH=$(echo ${{ steps.check_version.outputs.version }} | cut -d "." -f 1-2)
           make tag push IMAGE_TAG=$BRANCH
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release v${{ steps.check_version.outputs.version  }}
-          draft: true
-          prerelease: ${{ steps.check_version.outputs.prerelease }}
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./lvmd-${{ steps.check_version.outputs.version }}.tar.gz
-          asset_name: lvmd-${{ steps.check_version.outputs.version }}.tar.gz
-          asset_content_type: application/gzip
+      - name: Push branch tag arm64
+        if: ${{ steps.check_version.outputs.prerelease == 'false' }}
+        run: |
+          BRANCH=$(echo ${{ steps.check_version.outputs.version }} | cut -d "." -f 1-2)
+          make tag push IMAGE_TAG=$BRANCH IMAGE_ARCH=arm64
