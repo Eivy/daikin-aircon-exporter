@@ -8,3 +8,4 @@ RUN make
 FROM scratch
 COPY --from=build /workdir/build/daikin-aircon-exporter .
 ENTRYPOINT ["daikin-aircon-exporter"]
+LABEL org.opencontainers.image.source https://github.com/Eivy/daikin-aircon-exporter
