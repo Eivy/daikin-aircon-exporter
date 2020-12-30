@@ -1,11 +1,11 @@
-FROM golang:latest as build
+FROM golang:alpine as build
 ENV GO111MODULE=on
 
 COPY . /workdir
 WORKDIR /workdir
-RUN make
+RUN apk add make && make build/daikin-aircon-exporter
 
-FROM scratch
-COPY --from=build /workdir/build/daikin-aircon-exporter /
-ENTRYPOINT ["/daikin-aircon-exporter"]
+FROM alpine:latest
+COPY --from=build /workdir/build/ /usr/local/bin
+CMD ["daikin-aircon-exporter"]
 LABEL org.opencontainers.image.source https://github.com/Eivy/daikin-aircon-exporter
