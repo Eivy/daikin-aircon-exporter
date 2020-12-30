@@ -17,5 +17,5 @@ func Run(listen, ip string) {
 	log.Printf("Daikin Aircon Exporter version: %s start, target: %s", Version, ip)
 	log.Printf("Listeing %s\n", listen)
 	http.Handle("/metrics", promhttp.Handler())
-	log.Fatal(http.ListenAndServe(listen, nil))
+	log.Fatal(http.ListenAndServe(":"+listen, nil))
 }

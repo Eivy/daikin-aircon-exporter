@@ -12,7 +12,11 @@ func main() {
 	var listen string
 	var target string
 	var version bool
-	flag.StringVar(&listen, "listen address", ":9823", "listen address")
+	port := os.Getenv("DAIKIN_AIRCON_PORT")
+	if port == "" {
+		port = "9823"
+	}
+	flag.StringVar(&listen, "listen port", port, "listen address")
 	flag.StringVar(&target, "target", os.Getenv("DAIKIN_AIRCON_TARGET"), "target aircon IP Address")
 	flag.BoolVar(&version, "version", false, "print version")
 	flag.Parse()
