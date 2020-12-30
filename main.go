@@ -20,5 +20,9 @@ func main() {
 		fmt.Println(Version)
 		os.Exit(0)
 	}
+	if target == "" {
+		fmt.Fprintln(os.Stderr, "Specify target aircon IP Address with '--target' flag")
+		os.Exit(1)
+	}
 	exporter.Run(listen, target)
 }
