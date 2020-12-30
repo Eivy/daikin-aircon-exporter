@@ -23,7 +23,7 @@ endif
 .PHONY: tag
 tag:
 ifdef IMAGE_ARCH
-	docker tag $(IMAGE_PREFIX)daikin-aircon-exporter:devel $(IMAGE_PREFIX)daikin-aircon-exporter:$(IMAGE_TAG)-$(IMAGE_ARCH)
+	docker tag $(IMAGE_PREFIX)daikin-aircon-exporter:devel-$(IMAGE_ARCH) $(IMAGE_PREFIX)daikin-aircon-exporter:$(IMAGE_TAG)-$(IMAGE_ARCH)
 else
 	docker tag $(IMAGE_PREFIX)daikin-aircon-exporter:devel $(IMAGE_PREFIX)daikin-aircon-exporter:$(IMAGE_TAG)
 endif
